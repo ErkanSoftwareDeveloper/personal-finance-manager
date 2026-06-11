@@ -1,0 +1,3 @@
+-- Users table
+-- Transactions table
+-- Categories table
