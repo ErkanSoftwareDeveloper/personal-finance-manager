@@ -15,4 +15,5 @@ Build a real-world backend system using FastAPI and PostgreSQL.
 ## Tech Stack
 - Python
 - FastAPI
-- PostgreSQL
+- MySQL
+- pymysql
