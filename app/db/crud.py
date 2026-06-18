@@ -1,16 +1,62 @@
-from app.db.database import getDBConnection
+from sqlalchemy.orm import Session
+from app import models
+
+# ------------ CREATE USER-------------------
 
 
-def create_user(username, password_hash):
-    connection = getDBConnection()
-    cursor = connection.cursor()
+def create_user(db: Session, username: str, password_hash: str):
+    user = models.User(
+        username=username,
+        password_hash=password_hash
+    )
 
-    query = "INSERT INTO users (username, password_hash) VALUES (%s, %s)"
-    cursor.execute(query, (username, password_hash))
+    db.add(user)
+    db.commit()
+    db.refresh(user)
 
-    connection.commit()
-    connection.close()
+    return user
+
+# get user by id
 
 
-def get_users():
-    connection = getDBConnection()
+def get_user(db: Session, user_id: int):
+    return db.query(models.User).filter(
+        models.User.user_id == user_id
+    ).first()
+
+# get user by username
+
+
+def get_user_by_username(db: Session, username: str):
+    return db.query(models.User).filter(
+        models.User.username == username
+    ).first()
+
+
+# ------------ TRANSACTION FUNCTIONS -------------------
+def create_transaction(db: Session, user_id: int, amount: float, category: str):
+    transaction = models.Transaction(
+        user_id=user_id,
+        amount=amount,
+        category=category
+    )
+
+    db.add(transaction)
+    db.commit()
+    db.refresh(transaction)
+
+    return transaction
+
+
+# ------------ BALANCE LOGIC -------------------
+
+def get_balance(db: Session, user_id: int):
+    transactions = db.query(models.Transaction).filter(
+        models.Transaction.user_id == user_id
+    ).all()
+
+    balance = 0
+
+    for t in transactions:
+        balance += t.amount
+    return balance
