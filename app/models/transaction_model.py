@@ -1,0 +1,18 @@
+from sqlaclhemy import Column, Integer, String, DECIMAL, ForeignKey
+
+from app.db.database import Base
+
+
+class Transaction(Base):
+    __tablename__ = "transactions"
+
+    transaction_id = Column(Integer, primary_key=True, index=True)
+
+    user_id = Column(
+        Integer,
+        ForeignKey("users.user_id"),
+        nullable=False
+    )
+
+    amount = Column(DECIMAL(10, 2), nullable=False)
+    category = Column(String(50))
