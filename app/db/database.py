@@ -1,17 +1,21 @@
-import pymysql
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+# MySQL connection adres
+DATABASE_URL = "mysql+pymysql://root:@localhost:3306/finance_managerDB"
+
+# Database engine
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True
+)
 
 
-def getDBConnection():
-    return pymysql.connect(
-        host='localhost',
-        user='root',
-        password='',
-        database='finance_managerDB'
-    )
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
 
 
-try:
-    connection = getDBConnection()
-    print("Database connection successful!")
-except Exception as e:
-    print(f"Database connection failed: {e}")
+Base = declarative_base()

@@ -60,3 +60,11 @@ def get_balance(db: Session, user_id: int):
     for t in transactions:
         balance += t.amount
     return balance
+
+
+# --------- Get_transactions -------------------
+
+def get_transactions(db: Session, user_id: int):
+    return db.query(models.Transaction).filter(
+        models.Transaction.user_id == user_id
+    ).all()

@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
-from app import models, crud
-from app.database import SessionLocal, engine
+
+from app.db import crud
+from app.db.database import SessionLocal
 
 app = FastAPI()
 
@@ -31,7 +32,7 @@ def register_user(username: str, password: str, db: Session = Depends(get_db)):
 
     return {
         "message": "User created",
-        "user_id": user.user.id
+        "user_id": user.user_id
     }
 
 
