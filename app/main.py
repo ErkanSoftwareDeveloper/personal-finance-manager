@@ -1,8 +1,11 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db import crud
 from app.db.database import SessionLocal
+from app.schemas.transaction_schema import (
+    TransactionCreate, TransactionResponse)
+
 
 app = FastAPI()
 
@@ -44,13 +47,31 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
 
 
 # ----------- TRANSACTIONS -------------------
-@app.post("/transactions")
-def create_transaction(user_id: int, amount: float, category: str, db: Session = Depends(get_db)):
-    transaction = crud.create_transaction(db, user_id, amount, category)
-    return {
-        "message": "Transaction added",
-        "transaction_id": transaction.transaction_id
-    }
+@app.post(
+    "/transactions",
+    response_model=TransactionResponse,
+    status_code=status.HTTP_201_CREATED
+)
+def add_transaction(
+    transaction_data: TransactionCreate,
+    db: Session = Depends(get_db)
+):
+
+    user = crud.get_user(db, transaction_data.user_id)
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    return crud.create_transaction(
+        db=db,
+        user_id=transaction_data.user_id,
+        amount=transaction_data.amount,
+        transaction_type=transaction_data.transaction_type,
+        category=transaction_data.category
+    )
 
 # ----------- TRANSACTIONS List -------------------
 

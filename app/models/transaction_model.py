@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DECIMAL, ForeignKey
+from sqlalchemy import Column, Integer, String, DECIMAL, ForeignKey, Enum
 
 from app.db.database import Base
 
@@ -15,4 +15,10 @@ class Transaction(Base):
     )
 
     amount = Column(DECIMAL(10, 2), nullable=False)
+
+    transaction_type = Column(
+        Enum("income", "expense", name="transaction_type"),
+        nullable=False
+    )
+
     category = Column(String(50))

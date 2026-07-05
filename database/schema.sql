@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     transaction_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
+    transaction_type ENUM('income', 'expense') NOT NULL,
     category VARCHAR(50),
     FOREIGN KEY (user_id) REFERENCES users (user_id)
 );

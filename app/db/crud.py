@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from app import models
+from decimal import Decimal
 
 # ------------ CREATE USER-------------------
 
@@ -34,11 +35,12 @@ def get_user_by_username(db: Session, username: str):
 
 
 # ------------ TRANSACTION FUNCTIONS -------------------
-def create_transaction(db: Session, user_id: int, amount: float, category: str):
+def create_transaction(db: Session, user_id: int, amount: Decimal, category: str, transaction_type: str):
     transaction = models.Transaction(
         user_id=user_id,
         amount=amount,
-        category=category
+        category=category,
+        transaction_type=transaction_type
     )
 
     db.add(transaction)
@@ -51,18 +53,21 @@ def create_transaction(db: Session, user_id: int, amount: float, category: str):
 # ------------ BALANCE LOGIC -------------------
 
 def get_balance(db: Session, user_id: int):
-    transactions = db.query(models.Transaction).filter(
-        models.Transaction.user_id == user_id
-    ).all()
+    transactions = get_transactions(db, user_id)
 
-    balance = 0
+    balance = Decimal("0.00")
 
-    for t in transactions:
-        balance += t.amount
+    for transaction in transactions:
+        if transaction.transaction_type == "income":
+            balance += transaction.amount
+
+        elif transaction.transaction_type == "expense":
+            balance -= transaction.amount
+
     return balance
 
-
 # --------- Get_transactions -------------------
+
 
 def get_transactions(db: Session, user_id: int):
     return db.query(models.Transaction).filter(

@@ -23,3 +23,5 @@ VALUES (1, 500, 'Bank'),
     (2, 750, 'IT');
 
 SELECT * FROM transactions;
+
+SELECT user_id, username FROM users;
