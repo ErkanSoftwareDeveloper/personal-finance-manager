@@ -6,6 +6,7 @@ from app.db.database import SessionLocal
 from app.schemas.transaction_schema import (
     TransactionCreate, TransactionResponse)
 from app.schemas.user_schema import UserRegister, UserResponse
+from app.core.security import hash_password
 
 app = FastAPI()
 
@@ -34,7 +35,7 @@ def register_user(user_data: UserRegister, db: Session = Depends(get_db)):
     user = crud.create_user(
         db=db,
         username=user_data.username,
-        password_hash=user_data.password
+        password_hash=hash_password(user_data.password)
     )
     return user
 
