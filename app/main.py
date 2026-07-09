@@ -5,7 +5,7 @@ from app.db import crud
 from app.db.database import SessionLocal
 from app.schemas.transaction_schema import (
     TransactionCreate, TransactionResponse)
-
+from app.schemas.user_schema import UserRegister, UserResponse
 
 app = FastAPI()
 
@@ -28,18 +28,19 @@ def root():
 
 
 # ----------- USERS -------------------
-@app.post("/register")
-def register_user(username: str, password: str, db: Session = Depends(get_db)):
+@app.post("/register", response_model=UserResponse)
+def register_user(user_data: UserRegister, db: Session = Depends(get_db)):
     # add new user to the database
-    user = crud.create_user(db, username, password)
-
-    return {
-        "message": "User created",
-        "user_id": user.user_id
-    }
-
+    user = crud.create_user(
+        db=db,
+        username=user_data.username,
+        password_hash=user_data.password
+    )
+    return user
 
 # ------------ USER get BY ID-------------------
+
+
 @app.get("/users/{user_id}")
 def get_user(user_id: int, db: Session = Depends(get_db)):
     user = crud.get_user(db, user_id)
