@@ -5,8 +5,9 @@ from app.db import crud
 from app.db.database import SessionLocal
 from app.schemas.transaction_schema import (
     TransactionCreate, TransactionResponse)
-from app.schemas.user_schema import UserRegister, UserResponse
-from app.core.security import hash_password
+from app.schemas.user_schema import UserRegister, UserLogin, UserResponse
+from app.core.security import hash_password, verify_password
+
 
 app = FastAPI()
 
@@ -38,6 +39,29 @@ def register_user(user_data: UserRegister, db: Session = Depends(get_db)):
         password_hash=hash_password(user_data.password)
     )
     return user
+
+
+@app.post("/login")
+def login_user(user_data: UserLogin, db: Session = Depends(get_db)):
+    user = crud.get_user_by_username(db, user_data.username)
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password"
+        )
+
+    if not verify_password(user_data.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password"
+        )
+
+    return {
+        "message": "Login successful",
+        "user_id": user.user_id,
+        "username": user.username
+    }
 
 # ------------ USER get BY ID-------------------
 
