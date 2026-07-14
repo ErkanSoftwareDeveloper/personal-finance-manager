@@ -1,18 +1,21 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from app.db import crud
 from app.db.database import SessionLocal
 from app.schemas.transaction_schema import (
     TransactionCreate, TransactionResponse)
 from app.schemas.user_schema import UserRegister, UserLogin, UserResponse
-from app.core.security import hash_password, verify_password
+from app.core.security import (
+    hash_password, verify_password, create_access_token, decode_access_token)
 
 
 app = FastAPI()
-
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 # DB SESSION DEPENDENCY
+
 
 def get_db():
     db = SessionLocal()
@@ -20,6 +23,40 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# -------------------- Helper function ------------------
+
+
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = decode_access_token(token)
+
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token"
+        )
+
+    username = payload.get("sub")
+
+    if username is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload"
+        )
+
+    user = crud.get_user_by_username(db, username)
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found"
+        )
+
+    return user
+
 
 # ----------- ROOT -------------------
 
@@ -42,8 +79,11 @@ def register_user(user_data: UserRegister, db: Session = Depends(get_db)):
 
 
 @app.post("/login")
-def login_user(user_data: UserLogin, db: Session = Depends(get_db)):
-    user = crud.get_user_by_username(db, user_data.username)
+def login_user(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
+    user = crud.get_user_by_username(db, form_data.username)
 
     if user is None:
         raise HTTPException(
@@ -51,17 +91,25 @@ def login_user(user_data: UserLogin, db: Session = Depends(get_db)):
             detail="Invalid username or password"
         )
 
-    if not verify_password(user_data.password, user.password_hash):
+    if not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid username or password"
         )
 
+    access_token = create_access_token(
+        data={"sub": user.username}
+    )
+
     return {
-        "message": "Login successful",
-        "user_id": user.user_id,
-        "username": user.username
+        "access_token": access_token,
+        "token_type": "bearer"
     }
+
+
+@app.get("/me", response_model=UserResponse)
+def read_me(current_user=Depends(get_current_user)):
+    return current_user
 
 # ------------ USER get BY ID-------------------
 
