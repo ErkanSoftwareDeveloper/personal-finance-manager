@@ -107,20 +107,16 @@ def login_user(
     }
 
 
+# ------------ USER -------------------
+
+
 @app.get("/me", response_model=UserResponse)
 def read_me(current_user=Depends(get_current_user)):
     return current_user
 
-# ------------ USER get BY ID-------------------
-
-
-@app.get("/users/{user_id}")
-def get_user(user_id: int, db: Session = Depends(get_db)):
-    user = crud.get_user(db, user_id)
-    return user
-
-
 # ----------- TRANSACTIONS -------------------
+
+
 @app.post(
     "/transactions",
     response_model=TransactionResponse,
@@ -150,13 +146,6 @@ def add_transaction(
 # ----------- TRANSACTIONS List -------------------
 
 
-@app.get("/transactions/{user_id}")
-def get_transactions(user_id: int, db: Session = Depends(get_db)):
-    return crud.get_transactions(db, user_id)
-
-# ----
-
-
 @app.get("/transactions")
 def get_my_transactions(
     current_user=Depends(get_current_user),
@@ -165,18 +154,6 @@ def get_my_transactions(
     return crud.get_transactions(db, current_user.user_id)
 
 # ----------- BALANCE -------------------
-
-
-@app.get("/balance/{user_id}")
-def get_balance(user_id: int, db: Session = Depends(get_db)):
-    balance = crud.get_balance(db, user_id)
-
-    return {
-        "user_id": user_id,
-        "balance": balance
-    }
-
-# -----------
 
 
 @app.get("/balance")
