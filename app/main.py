@@ -154,6 +154,16 @@ def add_transaction(
 def get_transactions(user_id: int, db: Session = Depends(get_db)):
     return crud.get_transactions(db, user_id)
 
+# ----
+
+
+@app.get("/transactions")
+def get_my_transactions(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    return crud.get_transactions(db, current_user.user_id)
+
 # ----------- BALANCE -------------------
 
 
@@ -163,5 +173,20 @@ def get_balance(user_id: int, db: Session = Depends(get_db)):
 
     return {
         "user_id": user_id,
+        "balance": balance
+    }
+
+# -----------
+
+
+@app.get("/balance")
+def get_my_balance(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    balance = crud.get_balance(db, current_user.user_id)
+
+    return {
+        "user_id": current_user.user_id,
         "balance": balance
     }
