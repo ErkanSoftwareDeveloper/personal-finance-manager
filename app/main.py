@@ -124,25 +124,16 @@ def read_me(current_user=Depends(get_current_user)):
 )
 def add_transaction(
     transaction_data: TransactionCreate,
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-
-    user = crud.get_user(db, transaction_data.user_id)
-
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
-
     return crud.create_transaction(
         db=db,
-        user_id=transaction_data.user_id,
+        user_id=current_user.user_id,
         amount=transaction_data.amount,
         transaction_type=transaction_data.transaction_type,
         category=transaction_data.category
     )
-
 # ----------- TRANSACTIONS List -------------------
 
 

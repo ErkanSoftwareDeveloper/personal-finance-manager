@@ -5,12 +5,8 @@ from pydantic import BaseModel, Field
 
 
 class TransactionCreate(BaseModel):
-    user_id: int
     amount: Decimal = Field(gt=0)
-    category: str = Field(min_length=1, max_length=50)
-
     transaction_type: Literal["income", "expense"]
-
     category: str = Field(min_length=1, max_length=50)
 
 
