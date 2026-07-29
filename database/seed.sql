@@ -18,10 +18,15 @@ SELECT * FROM users;
 
 -- Test Transactions
 INSERT INTO
-    transactions (user_id, amount, category)
-VALUES (1, 500, 'Bank'),
-    (2, 750, 'IT');
+    transactions (
+        user_id,
+        amount,
+        transaction_type,
+        category
+    )
+VALUES (1, 500, 'income', 'Bank'),
+    (2, 750, 'expense', 'IT');
+
+SELECT * FROM users;
 
 SELECT * FROM transactions;
-
-SELECT user_id, username FROM users;
