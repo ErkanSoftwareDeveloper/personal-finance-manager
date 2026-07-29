@@ -1,8 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+from app.core.config import settings
 
 # MySQL connection adres
-DATABASE_URL = "mysql+pymysql://root:@localhost:3306/finance_managerDB"
+DATABASE_URL = settings.database_url
 
 # Database engine
 engine = create_engine(
