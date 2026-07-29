@@ -95,7 +95,7 @@ Create the database and tables by running:
 database/schema.sql
 ```
 
-You can execute the SQL file with DBeaver, MySQL Workbench, or the MySQL command-line client.
+You can execute this file using DBeaver, MySQL Workbench, or the MySQL command-line client.
 
 The default database name is:
 
@@ -103,15 +103,9 @@ The default database name is:
 finance_managerDB
 ```
 
-Make sure the database connection URL in `app/db/database.py` matches your local MySQL configuration.
+The database connection is configured through the `DATABASE_URL` environment variable.
 
-Example:
-
-```python
-DATABASE_URL = "mysql+pymysql://root:your_password@localhost:3306/finance_managerDB"
-```
-
-Do not commit real database credentials to a public repository.
+Do not store database credentials directly in the Python source code.
 
 ## Environment Variables
 
@@ -120,17 +114,24 @@ Create a `.env` file in the project root:
 ```env
 SECRET_KEY=your-secure-secret-key
 ACCESS_TOKEN_EXPIRE_MINUTES=30
+DATABASE_URL=mysql+pymysql://root:your_password@localhost:3306/finance_managerDB
 ```
 
-Generate a secure secret key with:
+When the local MySQL root user has no password, the database URL can look like this:
+
+```env
+DATABASE_URL=mysql+pymysql://root:@localhost:3306/finance_managerDB
+```
+
+Generate a secure JWT secret key with:
 
 ```bash
 python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-Copy the generated value into the `.env` file.
+Copy the generated value into `SECRET_KEY`.
 
-The `.env` file is ignored by Git and must not be committed.
+The `.env` file is ignored by Git and must never be committed.
 
 ## Running the Application
 
